@@ -1,0 +1,126 @@
+[gd_scene format=3 uid="uid://gnrg05kweyyu"]
+
+[ext_resource type="Script" uid="uid://w88e1ox5twad" path="res://battle.gd" id="1_u8cu3"]
+[ext_resource type="Script" uid="uid://dv6554hn4au8t" path="res://Fighter.gd" id="2_lul25"]
+[ext_resource type="Texture2D" uid="uid://c8fucu04t6u4m" path="res://icon.svg" id="3_yh5fh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xrivr"]
+bg_color = Color(0.9764706, 0.22352941, 0.3254902, 1)
+corner_detail = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1046u"]
+bg_color = Color(0.34293514, 0.6916299, 0.3615423, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pjn1s"]
+bg_color = Color(0.39774752, 0.68341506, 0.33192453, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0ll1"]
+bg_color = Color(0.3358577, 0.69236684, 0.3681355, 1)
+
+[node name="Battle" type="CanvasLayer" unique_id=1874539971]
+script = ExtResource("1_u8cu3")
+
+[node name="Panel" type="Panel" parent="." unique_id=1866517837]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StatusLabel" type="Label" parent="." unique_id=1987284648]
+anchors_preset = -1
+anchor_left = 0.41400003
+anchor_top = 0.947
+anchor_right = 0.41900003
+anchor_bottom = 0.95000005
+offset_left = -85.92804
+offset_top = -602.656
+offset_right = 260.31195
+offset_bottom = -581.60004
+text = "Turn: Player | Player HP: 100 | Enemy HP: 100"
+
+[node name="HBoxContainer" type="GridContainer" parent="." unique_id=1698473]
+offset_left = 649.0
+offset_top = 520.0
+offset_right = 1579.0
+offset_bottom = 915.0
+columns = 3
+
+[node name="AttackButton" type="Button" parent="HBoxContainer" unique_id=1718297289]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "Attack"
+
+[node name="HealButton" type="Button" parent="HBoxContainer" unique_id=1667474033]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "Heal
+"
+
+[node name="SellButton" type="Button" parent="HBoxContainer" unique_id=102620932]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_1046u")
+theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_xrivr")
+text = "Sell Item"
+
+[node name="SellTomeButton" type="Button" parent="HBoxContainer" unique_id=1015497601]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_pjn1s")
+text = "Sell Fireball Tome"
+
+[node name="SellJunkButton" type="Button" parent="HBoxContainer" unique_id=2078662098]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0ll1")
+text = "Sell Junk"
+
+[node name="ContinueButton" type="Button" parent="HBoxContainer" unique_id=659506171]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "Proceed to Next Battle"
+
+[node name="UpgradeAttackButton" type="Button" parent="HBoxContainer" unique_id=246584309]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "+5 Attack (10G)"
+
+[node name="UpgradeHealthButton" type="Button" parent="HBoxContainer" unique_id=1344081820]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "+20 Max HP (10G)"
+
+[node name="UpgradeHealButton" type="Button" parent="HBoxContainer" unique_id=1561915525]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_xrivr")
+text = "Heal 30 HP (5G)"
+
+[node name="Player" type="Node2D" parent="." unique_id=1188693295]
+script = ExtResource("2_lul25")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=1014488770]
+position = Vector2(144, 380)
+texture = ExtResource("3_yh5fh")
+
+[node name="Enemy" type="Node2D" parent="." unique_id=228875843]
+script = ExtResource("2_lul25")
+max_hp = 50
+attack_power = 10
+
+[node name="Sprite2D" type="Sprite2D" parent="Enemy" unique_id=185299184]
+modulate = Color(0.8528458, 0.20735708, 0.21548882, 1)
+visibility_layer = 15
+position = Vector2(943, 107)
+texture = ExtResource("3_yh5fh")
+
+[node name="PlayerHealthBar" type="ProgressBar" parent="." unique_id=935056888]
+offset_left = 41.0
+offset_top = 468.0
+offset_right = 230.0
+offset_bottom = 511.0
+theme_override_colors/font_color = Color(0.5861504, 0.9530905, 0.43994915, 1)
+
+[node name="EnemyHealthBar" type="ProgressBar" parent="." unique_id=1218688813]
+offset_left = 861.0
+offset_top = 195.0
+offset_right = 1025.0
+offset_bottom = 237.0
+theme_override_colors/font_color = Color(0.89690757, 0.25811175, 0.36317727, 1)
