@@ -17,6 +17,8 @@ bg_color = Color(0.39774752, 0.68341506, 0.33192453, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0ll1"]
 bg_color = Color(0.3358577, 0.69236684, 0.3681355, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_13qdw"]
+
 [node name="Battle" type="CanvasLayer" unique_id=1874539971]
 script = ExtResource("1_u8cu3")
 
@@ -97,7 +99,7 @@ text = "Heal 30 HP (5G)"
 script = ExtResource("2_lul25")
 
 [node name="Sprite2D" type="Sprite2D" parent="Player" unique_id=1014488770]
-position = Vector2(144, 380)
+position = Vector2(302, 395)
 texture = ExtResource("3_yh5fh")
 
 [node name="Enemy" type="Node2D" parent="." unique_id=228875843]
@@ -112,10 +114,10 @@ position = Vector2(943, 107)
 texture = ExtResource("3_yh5fh")
 
 [node name="PlayerHealthBar" type="ProgressBar" parent="." unique_id=935056888]
-offset_left = 41.0
-offset_top = 468.0
-offset_right = 230.0
-offset_bottom = 511.0
+offset_left = 204.0
+offset_top = 493.0
+offset_right = 393.0
+offset_bottom = 536.0
 theme_override_colors/font_color = Color(0.5861504, 0.9530905, 0.43994915, 1)
 
 [node name="EnemyHealthBar" type="ProgressBar" parent="." unique_id=1218688813]
@@ -124,3 +126,18 @@ offset_top = 195.0
 offset_right = 1025.0
 offset_bottom = 237.0
 theme_override_colors/font_color = Color(0.89690757, 0.25811175, 0.36317727, 1)
+
+[node name="StatsPanel" type="Label" parent="." unique_id=1372519770]
+anchors_preset = -1
+offset_left = 28.0
+offset_top = 210.0
+offset_right = 197.0
+offset_bottom = 301.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_13qdw")
+
+[node name="RestartButton" type="Button" parent="." unique_id=1547125696]
+offset_left = 308.0
+offset_top = 146.0
+offset_right = 854.0
+offset_bottom = 442.0
+text = "Play Again"

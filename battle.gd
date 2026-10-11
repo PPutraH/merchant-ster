@@ -17,6 +17,8 @@ var current_round: int = 1
 @onready var upg_attack_btn: Button = $HBoxContainer/UpgradeAttackButton
 @onready var upg_health_btn: Button = $HBoxContainer/UpgradeHealthButton
 @onready var upg_heal_btn: Button = $HBoxContainer/UpgradeHealButton
+@onready var stats_panel: Label = $StatsPanel
+@onready var restart_btn: Button = $RestartButton
 
 # --- FIGHTERS ---
 @onready var player = $Player
@@ -28,9 +30,9 @@ func _ready() -> void:
 	heal_btn.pressed.connect(_on_heal_pressed)
 	
 	# Connect shop buttons
-	sell_btn.pressed.connect(func(): _sell_item("health_potion"))
-	sell_tome_btn.pressed.connect(func(): _sell_item("fireball_tome"))
-	sell_junk_btn.pressed.connect(func(): _sell_item("junk"))
+	sell_btn.pressed.connect(func(): _sell_item("health_potion", 5))
+	sell_tome_btn.pressed.connect(func(): _sell_item("fireball_tome", 15))
+	sell_junk_btn.pressed.connect(func(): _sell_item("junk", 2))
 	
 	# Shop Purchases
 	upg_attack_btn.pressed.connect(_on_buy_attack)
@@ -40,6 +42,9 @@ func _ready() -> void:
 	continue_btn.pressed.connect(_on_continue_pressed)
 	
 	start_combat_round()
+	
+	restart_btn.pressed.connect(_on_restart_pressed)
+	restart_btn.visible = false
 
 # ==========================================
 # UI VISIBILITY CONTROLLERS
@@ -63,6 +68,8 @@ func show_combat_ui() -> void:
 	enemy_hp_bar.visible = true
 	player.visible = true
 	enemy.visible = true
+	
+	restart_btn.visible = false
 
 func show_shop_ui() -> void:
 	# Hide combat buttons
@@ -82,6 +89,8 @@ func show_shop_ui() -> void:
 	enemy_hp_bar.visible = false
 	player.visible = false
 	enemy.visible = false
+	
+	restart_btn.visible = false
 
 # ==========================================
 # COMBAT FLOW
@@ -108,11 +117,14 @@ func _on_attack_pressed() -> void:
 	if not enemy.is_alive():
 		if current_round == 6:
 			status_label.text = "VICTORY! You defeated the Merchant Boss!"
-			attack_btn.disabled = true
-			heal_btn.disabled = true
+			attack_btn.visible = false
+			heal_btn.visible = false
+			restart_btn.visible = true # <--- Show the restart button
+			
 		else:
 			# Enemy defeated! Trigger Merchant encounter
 			open_merchant_shop()
+			generate_loot()
 	else:
 		start_enemy_turn()
 
@@ -132,7 +144,11 @@ func start_enemy_turn() -> void:
 		update_combat_ui("Enemy attacked you!")
 		
 		if not player.is_alive():
-			status_label.text = "GAME OVER: You were defeated in battle."
+			status_label.text = "GAME OVER: You were defeated!"
+			attack_btn.visible = false
+			heal_btn.visible = false
+			upg_heal_btn.visible = false
+			restart_btn.visible = true # <--- Show the restart button
 		else:
 			current_state = State.COMBAT_PLAYER
 			attack_btn.disabled = false
@@ -147,9 +163,24 @@ func open_merchant_shop() -> void:
 	show_shop_ui()
 	status_label.text = "Wave " + str(current_round) + " Cleared! Merchant: 'Interested in selling any goods before your next fight?'"
 
-func _sell_item(item_id: String) -> void:
-	GameState.merchant_inventory[item_id] = GameState.merchant_inventory.get(item_id, 0) + 1
-	status_label.text = "Sold 1x " + item_id + "! Merchant Inventory: " + str(GameState.merchant_inventory)
+func _sell_item(item_id: String, gold_value: int) -> void:
+	# Check if the player has at least 1 of the item
+	if GameState.player_inventory.get(item_id, 0) > 0:
+		# Deduct from player, add to merchant, give gold
+		GameState.player_inventory[item_id] -= 1
+		GameState.merchant_inventory[item_id] = GameState.merchant_inventory.get(item_id, 0) + 1
+		GameState.player_gold += gold_value
+		
+		update_sell_button_text()
+		update_shop_ui("Sold " + item_id + " for " + str(gold_value) + "G!")
+	else:
+		update_shop_ui("You do not have any " + item_id + " to sell!")
+
+func update_sell_button_text() -> void:
+	# Updates the button text to show (Owned: X)
+	sell_btn.text = "Sell Potion (Owns: " + str(GameState.player_inventory["health_potion"]) + ")"
+	sell_tome_btn.text = "Sell Tome (Owns: " + str(GameState.player_inventory["fireball_tome"]) + ")"
+	sell_junk_btn.text = "Sell Junk (Owns: " + str(GameState.player_inventory["junk"]) + ")"
 
 func _on_continue_pressed() -> void:
 	current_round += 1
@@ -202,6 +233,7 @@ func run_merchant_boss_turn() -> void:
 		GameState.merchant_inventory["health_potion"] -= 1
 		enemy.heal(30)
 		update_combat_ui("Merchant Boss drank a sold Potion to heal!")
+		
 	# Priority 2: Fireball
 	elif tomes > 0:
 		GameState.merchant_inventory["fireball_tome"] -= 1
@@ -218,12 +250,19 @@ func run_merchant_boss_turn() -> void:
 		player.take_damage(enemy.attack_power)
 		update_combat_ui("Merchant Boss attacked with his cane!")
 	
+	
 	if not player.is_alive():
-		status_label.text = "Defeated by your own greed against the Merchant!"
+			status_label.text = "GAME OVER: You were defeated!"
+			attack_btn.visible = false
+			heal_btn.visible = false
+			upg_heal_btn.visible = false
+			restart_btn.visible = true # <--- Show the restart button
 	else:
 		current_state = State.COMBAT_PLAYER
 		attack_btn.disabled = false
 		heal_btn.disabled = false
+	
+
 
 # ==========================================
 # UI HELPER
@@ -240,6 +279,50 @@ func update_combat_ui(message: String) -> void:
 	# Update Enemy Health Bar
 	enemy_hp_bar.max_value = enemy.max_hp
 	enemy_hp_bar.value = enemy.hp
+	
+	update_stats_panel()
 
 func update_shop_ui(message: String) -> void:
 		status_label.text = "SHOP | " + message + " | Gold: " + str(GameState.player_gold)
+		update_stats_panel()
+
+func generate_loot() -> void:
+	# Randomize Gold between 5 and 15
+	var gold_drop = randi_range(5, 15)
+	GameState.player_gold += gold_drop
+	
+	# Create a loot table (Array). We put "junk" in multiple times to make it a common drop!
+	var possible_drops = ["health_potion", "junk", "junk", "junk", "fireball_tome"]
+	
+	# Pick one random item from the array
+	var dropped_item = possible_drops.pick_random()
+	GameState.player_inventory[dropped_item] += 1
+	
+	# Update the buttons so the player can see how many items they have
+	update_sell_button_text()
+	
+	update_shop_ui("Loot found: " + str(gold_drop) + " Gold & 1x " + dropped_item + "!")
+
+func update_stats_panel() -> void:
+	var text = "=== PLAYER STATS ===\n"
+	text += "HP: " + str(player.hp) + " / " + str(player.max_hp) + "\n"
+	text += "Attack: " + str(player.attack_power) + "\n"
+	text += "Gold: " + str(GameState.player_gold) + " G\n\n"
+	
+	text += "=== INVENTORY ===\n"
+	text += "Potions: " + str(GameState.player_inventory.get("health_potion", 0)) + "\n"
+	text += "Fireball Tomes: " + str(GameState.player_inventory.get("fireball_tome", 0)) + "\n"
+	text += "Junk: " + str(GameState.player_inventory.get("junk", 0))
+	
+	stats_panel.text = text
+
+func _on_restart_pressed() -> void:
+	# 1. Reset Global Data
+	GameState.player_gold = 0
+	GameState.merchant_inventory.clear()
+	
+	for key in GameState.player_inventory.keys():
+		GameState.player_inventory[key] = 0
+		
+	# 2. Reload the scene to reset health, rounds, and UI
+	get_tree().reload_current_scene()
